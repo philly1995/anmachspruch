@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Ballermann-Anmachspruch</title>
+  <title>Ballermann Anmachspruch Generator</title>
   <style>
     body {
       background-color: #fff0f5;
@@ -10,63 +10,203 @@
       text-align: center;
       padding: 50px;
     }
-    h1 {
+    h1, h2 {
       font-size: 2em;
+      margin-bottom: 20px;
+    }
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
     button {
-      padding: 15px 30px;
-      font-size: 1.2em;
+      padding: 12px 25px;
+      font-size: 1em;
       background-color: #ff69b4;
       border: none;
       border-radius: 8px;
       color: white;
       cursor: pointer;
+      width: fit-content;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    #spruch {
-      margin-top: 30px;
+    button:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 10px #ff69b4aa;
+    }
+    #spruch, #shot-output, #truth-output {
+      margin-top: 40px;
       font-size: 1.4em;
       color: #aa007f;
+      min-height: 60px;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+    #loader {
+      width: 280px;
+      height: 12px;
+      margin: 10px auto;
+      background: #ffd1ec;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      display: none;
+    }
+    #loader::before {
+      content: '';
+      position: absolute;
+      height: 100%;
+      background-image: repeating-linear-gradient(
+        90deg,
+        #ff69b4 0,
+        #ff69b4 10px,
+        transparent 10px,
+        transparent 20px
+      );
+      animation: loadingBar 1.4s linear forwards;
+      width: 100%;
+      left: 0;
+    }
+    @keyframes loadingBar {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    #truth-section, #shot-section {
+      margin-top: 50px;
+    }
+    .small-text {
+      font-size: 0.9em;
+      color: #444;
+      margin-bottom: 15px;
     }
   </style>
 </head>
 <body>
+  <h1>Ballermann Anmachspruch Generator</h1>
 
-  <h1>Jetzt Ballermann-Anmachspruch abholen</h1>
-  <button onclick="zeigSpruch()">Los geht’s</button>
+  <div class="button-container">
+    <button onclick="zeigSpruch()">Zufälligen Anmachspruch generieren</button>
+  </div>
+
   <div id="spruch"></div>
 
+  <div id="truth-section">
+    <h2>Pflicht oder Shot</h2>
+    <div class="small-text">Erfülle die Aufgabe oder trink einen Shot (oder einen großen Schluck deines Getränks)<br>
+      Du weißt nicht welchen Shot du trinken willst? Dann lass den Zufall unten entscheiden!</div>
+    <button onclick="zeigWahrheitOderShot()">Zeig mir meine Aufgabe</button>
+    <div id="loader"></div>
+    <div id="truth-output"></div>
+  </div>
+
+  <div id="shot-section">
+    <h2>Welcher Shot als nächstes?</h2>
+    <button id="shot-button" onclick="zeigShot()">Na schauen wir mal was wird</button>
+    <div id="shot-output"></div>
+  </div>
+
   <script>
-    const sprueche = [
-  // Deine Originale
-  "Ist dein Pullover aus Kamelhaar oder warum hast du so stabile Höcker?",
-  "Willst du alleinerziehende Mutter werden?",
-  "Isst du gerade Kaktuseis oder knistert’s zwischen uns?",
-  "Hast du 2 cm Platz und 15 Sekunden Zeit?",
-  "Ich bin so schlecht im Bett, das muss man erlebt haben, um es zu glauben!",
-  "Brauchst du noch einen schlechten Einfluss in deinem Leben?",
-  "Ich bin vom ADAC – ich bin hier, um dich abzuschleppen.",
-  "Ich weiß zwar nicht, wer du bist, aber ich glaube, ich würde es gerne wissen.",
-  "Kaufst du mir ein Eis? Du darfst danach auch an mir lecken.",
+    const alleSprueche = [
+      "Brauchst du noch einen schlechten Einfluss in deinem Leben?",
+      "Ich bin vom ADAC – ich bin hier, um dich abzuschleppen.",
+      "Kaufst du mir ein Eis? Du darfst danach auch an mir lecken.",
+      "Mein Bett quietscht, willst du es reparieren oder nur mit mir testen?",
+      "Bist du ein Kater? Weil ich das Gefühl hab, dass ich dich morgen noch spüren werde.",
+      "Wenn du 'ne Pizza wärst, wär ich der Käse, der an dir klebt.",
+      "Meine Liebe ist wie dein Drink – billig, aber macht was mit dir.",
+      "Ich bin kein DJ, aber ich leg heute noch bei dir auf.",
+      "Bist du Google? Weil du alles hast, wonach ich gesucht hab.",
+      "Willst du alleinerziehende Mutter werden?",
+      "Hast du 2 cm Platz und 15 Sekunden Zeit?",
+      "Ich bin so schlecht im Bett, das muss man erlebt haben, um es zu glauben!",
+      "Ich weiß zwar nicht, wer du bist, aber ich glaube, ich würde es gerne wissen.",
+      "Du kannst aufhören zu gucken, ich komm schon von alleine rüber.",
+      "Du siehst aus als wenn du gutes Frühstück machst – lass uns das testen.",
+      "Wie heißt du oder soll ich dich einfach Schatz nennen?",
+      "Ich steh auf ehrliche Männer. Also: Willst du nur rummachen oder auch mit mir frühstücken?",
+      "Du siehst aus, als hättest du schon mal ein Rohr verlegt – leg mir auch eins.",
+      "Ich bin vom Gesundheitsamt – und du bist eindeutig zu heiß!",
+      "Wenn du ein Cocktail wärst, wärst du definitiv 'Sex on the Beach'.",
+      "Sag mal, tanzen wir jetzt oder warten wir auf den Soundtrack unserer Lovestory?"
+    ];
 
-  // Angepasste Ergänzungen
-  "Bist du ein Kater? Weil ich das Gefühl hab, dass ich dich morgen noch spüren werde.",
+    const wahrheitOderShot = [
+      "Mache einem Fremden ein merkwürdiges Kompliment",
+      "Gib einem Fremden ein High Five und zieh kurz vorher zurück",
+      "Ruf einen beliebigen Kontakt an: Wenn er rangeht, sag dass du gut zuhause angekommen bist, wenn nicht: Shot",
+      "Umarme jemanden aus deiner Gruppe (oder einen Fremden) 10 Sekunden lang",
+      "Versuch jemanden mit einem Anmachspruch aus dieser Seite anzumachen",
+      "Tu so, als würdest du einen Heiratsantrag machen",
+      "Trink aus dem Glas eines Freundes – ohne zu fragen.",
+      "Erzähl einer fremden Person, dass sie dein ‚Promi-Doppelgänger‘ ist – egal wie falsch.",
+      "Stell dich neben eine fremde Gruppe, die nett aussieht und klatsch 10 Sekunden lang – kommentarlos.",
+      "Mach einem fremden Mann drei Komplimente über seine Schuhe.",
+      "Geh zur Bar und frag, ob du einen 'Probeschluck' kriegst.",
+      "Frag eine fremde Person, ob sie dir ihr Lieblingsgetränk erklärt – und tu so, als wärst du total beeindruckt.",
+      "Erzähle einer fremden Person, dass du ein ganz wildes Hobby hast – und denk dir was möglichst Merkwürdiges aus."
+    ];
 
-  // Weitere Sprüche (neutral & Malle-tauglich)
-  "Wenn du ein Cocktail wärst, wärst du definitiv 'Sex on the Beach'.",
-  "Sag mal, tanzen wir jetzt oder warten wir auf den Soundtrack unserer Lovestory?",
-  "Du bist der Grund, warum ich 'Layla' schon wieder ertrage.",
-  "Wenn du 'ne Pizza wärst, wär ich der Käse, der an dir klebt.",
-  "Meine Liebe ist wie dein Drink – billig, aber macht was mit dir.",
-  "Ich bin kein DJ, aber ich leg heute noch bei dir auf.",
-  "Bist du Google? Weil du alles hast, wonach ich gesucht hab."
-];
-
+    const shots = [
+      "Pfeffi", "Wodka", "Wodka Caramel", "Wodka Lemon", "Hierbas", "Palo", "Tequila", "Korn", "Apfelkorn",
+      "Doppelkorn", "Sambuca", "Asbach Uralt", "Baileys", "Jägermeister", "Whiskey", "Whisky",
+      "Kleiner Feigling", "Kümmerling", "Berliner Luft", "Underberg", "Rum", "JACKPOT - Such dir was aus",
+      "Zwischenwasser (wir sind ja nicht so)"
+    ];
 
     function zeigSpruch() {
-      const zufall = Math.floor(Math.random() * sprueche.length);
-      document.getElementById("spruch").innerText = sprueche[zufall];
+      const spruchFeld = document.getElementById("spruch");
+      let index = 0;
+      let count = 0;
+      const max = 20;
+      const interval = setInterval(() => {
+        spruchFeld.innerText = alleSprueche[index % alleSprueche.length];
+        index++;
+        count++;
+        if (count === max) {
+          clearInterval(interval);
+          const finalSpruch = alleSprueche[Math.floor(Math.random() * alleSprueche.length)];
+          spruchFeld.innerText = finalSpruch;
+        }
+      }, 60);
+    }
+
+    function zeigWahrheitOderShot() {
+      const output = document.getElementById("truth-output");
+      const loader = document.getElementById("loader");
+      output.innerText = "";
+      loader.style.display = "block";
+      setTimeout(() => {
+        loader.style.display = "none";
+        const zufall = Math.floor(Math.random() * wahrheitOderShot.length);
+        output.innerText = wahrheitOderShot[zufall];
+      }, 1400);
+    }
+
+    function zeigShot() {
+      const button = document.getElementById("shot-button");
+      const output = document.getElementById("shot-output");
+      let index = 0;
+      let count = 0;
+      const max = 20;
+      const interval = setInterval(() => {
+        output.innerText = shots[index % shots.length];
+        index++;
+        count++;
+        if (count === max) {
+          clearInterval(interval);
+          const finalShot = shots[Math.floor(Math.random() * shots.length)];
+          output.innerText = finalShot;
+          button.innerText = "Das wird!";
+          setTimeout(() => {
+            button.innerText = "Na schauen wir mal was wird";
+          }, 3000);
+        }
+      }, 80);
     }
   </script>
-
 </body>
 </html>

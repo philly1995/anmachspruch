@@ -28,6 +28,22 @@
       align-items: center;
       gap: 10px;
     }
+    .nav-buttons {
+      margin: 20px 0 60px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .nav-buttons button {
+      padding: 8px 14px;
+      font-size: 1em;
+      background-color: #aa007f;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
     button {
       padding: 16px 36px;
       font-size: 1.2em;
@@ -85,8 +101,8 @@
       0% { transform: translateX(-100%); }
       100% { transform: translateX(0); }
     }
-    #truth-section, #shot-section {
-      margin-top: 50px;
+    #truth-section, #shot-section, .button-container {
+      margin-top: 160px;
     }
     .small-text {
       font-size: 1.05em;
@@ -105,6 +121,9 @@
         font-size: 1em;
         padding: 14px 20px;
       }
+      .nav-buttons button {
+        font-size: 0.95em;
+      }
       .small-text {
         font-size: 1em;
       }
@@ -115,12 +134,17 @@
   </style>
 </head>
 <body>
-  <h1>Ballermann Anmachspruch Generator</h1>
+  <h1>Dieser QR-Code war deine beste Entscheidung heute!<br>Oder auch nicht. Versuch dein Glück.</h1>
+
+  <div class="nav-buttons">
+    <button onclick="document.getElementById('spruch').scrollIntoView({ behavior: 'smooth' })">Anmache</button>
+    <button onclick="document.getElementById('truth-section').scrollIntoView({ behavior: 'smooth' })">Spiel</button>
+    <button onclick="document.getElementById('shot-section').scrollIntoView({ behavior: 'smooth' })">Shot</button>
+  </div>
 
   <div class="button-container">
     <button onclick="zeigSpruch()">Zufälligen Anmachspruch generieren</button>
   </div>
-
   <div id="spruch"></div>
 
   <div id="truth-section">
@@ -156,11 +180,11 @@
       "Bist du ein Kater? Weil ich das Gefühl hab, dass ich dich morgen noch spüren werde.",
       "Wenn du ein Cocktail wärst, wärst du definitiv 'Sex on the Beach'.",
       "Sag mal, tanzen wir jetzt oder warten wir auf den Soundtrack unserer Lovestory?",
-      "Du kannst aufhören zu gucken, ich komm schon von alleine rüber.",
-      "Du siehst aus als wenn du gutes Frühstück machst, lass uns das testen.",
-      "Wie heißt du oder soll ich dich einfach Schatz nennen?",
+      "Du kannst aufhören zu gucken, ich komm schon von alleine rüber",
+      "Du siehst aus als wenn du gutes Frühstück machst, lass uns das testen",
+      "Wie heißt du oder soll ich dich einfach Schatz nennen",
       "Mein Bett quietscht, willst du es reparieren oder nur mit mir testen?",
-      "Ich steh auf ehrliche Männer, also: Willst du nur rummachen oder auch mit mir frühstücken?",
+      "Ich steh auf ehrliche Männer, also: Willst du nur rummachen oder auch mit mir Frühstücken?",
       "Du siehst aus als hättest du schon mal ein Rohr verlegt, leg mir auch eins.",
       "Wenn du 'ne Pizza wärst, wär ich der Käse, der an dir klebt.",
       "Meine Liebe ist wie dein Drink – billig, aber macht was mit dir.",
@@ -170,11 +194,10 @@
     ];
 
     const shots = [
-      "Pfeffi", "Wodka", "Wodka Caramel", "Wodka Lemon", "Hierbas", "Palo",
-      "Tequila", "Korn", "Apfelkorn", "Doppelkorn", "Sambuca", "Asbach Uralt",
-      "Baileys", "Jägermeister", "Whiskey", "Whisky", "Kleiner Feigling",
-      "Kümmerling", "Berliner Luft", "Underberg", "Rum", "JACKPOT - Such dir was aus",
-      "Zwischenwasser (wir sind ja nicht so)"
+      "Pfeffi", "Wodka", "Wodka Caramel", "Wodka Lemon", "Hierbas", "Palo", "Tequila", "Korn",
+      "Apfelkorn", "Doppelkorn", "Sambuca", "Asbach Uralt", "Baileys", "Jägermeister",
+      "Whiskey", "Whisky", "Kleiner Feigling", "Kümmerling", "Berliner Luft", "Underberg",
+      "Rum", "JACKPOT - Such dir was aus", "Zwischenwasser (wir sind ja nicht so)"
     ];
 
     const wahrheitOderShot = [
@@ -194,32 +217,32 @@
     ];
 
     function zeigSpruch() {
-      const zufall = sprueche[Math.floor(Math.random() * sprueche.length)];
-      document.getElementById("spruch").innerText = zufall;
+      const spruch = sprueche[Math.floor(Math.random() * sprueche.length)];
+      document.getElementById("spruch").textContent = spruch;
     }
 
     function zeigShot() {
+      const shot = shots[Math.floor(Math.random() * shots.length)];
+      document.getElementById("shot-output").textContent = shot;
       const button = document.getElementById("shot-button");
-      button.innerText = "Was wird...";
+      const originalText = "Na schauen wir mal was wird";
+      button.textContent = "Was wird";
       setTimeout(() => {
-        const shot = shots[Math.floor(Math.random() * shots.length)];
-        document.getElementById("shot-output").innerText = shot;
-        button.innerText = "Das wird!";
+        button.textContent = "Das wird!";
         setTimeout(() => {
-          button.innerText = "Na schauen wir mal was wird";
+          button.textContent = originalText;
         }, 3000);
-      }, 1000);
+      }, 1400);
     }
 
     function zeigWahrheitOderShot() {
-      document.getElementById("truth-output").innerText = "";
-      const loader = document.getElementById("loader");
-      loader.style.display = "block";
+      document.getElementById("loader").style.display = "block";
+      document.getElementById("truth-output").textContent = "";
       setTimeout(() => {
-        loader.style.display = "none";
+        document.getElementById("loader").style.display = "none";
         const aufgabe = wahrheitOderShot[Math.floor(Math.random() * wahrheitOderShot.length)];
-        document.getElementById("truth-output").innerText = aufgabe;
-      }, 1500);
+        document.getElementById("truth-output").textContent = aufgabe;
+      }, 1400);
     }
   </script>
 </body>

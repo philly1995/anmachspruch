@@ -5,17 +5,22 @@
   <meta http-equiv="Cache-Control" content="no-store" />
   <meta http-equiv="Expires" content="0" />
   <meta http-equiv="Pragma" content="no-cache" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ballermann Anmachspruch Generator</title>
   <style>
     body {
       background-color: #fff0f5;
       font-family: sans-serif;
       text-align: center;
-      padding: 50px;
+      padding: 40px 20px;
     }
-    h1, h2 {
+    h1 {
       font-size: 2em;
       margin-bottom: 20px;
+    }
+    h2 {
+      font-size: 1.6em;
+      margin-bottom: 15px;
     }
     .button-container {
       display: flex;
@@ -24,23 +29,24 @@
       gap: 10px;
     }
     button {
-      padding: 12px 25px;
-      font-size: 1em;
+      padding: 14px 30px;
+      font-size: 1.1em;
       background-color: #ff69b4;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       color: white;
       cursor: pointer;
-      width: fit-content;
+      width: 100%;
+      max-width: 300px;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     button:active {
-      transform: scale(0.95);
+      transform: scale(0.96);
       box-shadow: 0 0 10px #ff69b4aa;
     }
     #spruch, #shot-output, #truth-output {
-      margin-top: 40px;
-      font-size: 1.4em;
+      margin-top: 30px;
+      font-size: 1.3em;
       color: #aa007f;
       min-height: 60px;
       max-width: 90%;
@@ -50,7 +56,8 @@
       word-wrap: break-word;
     }
     #loader {
-      width: 300px;
+      width: 90%;
+      max-width: 300px;
       height: 14px;
       margin: 10px auto;
       background: #ffd1ec;
@@ -82,9 +89,10 @@
       margin-top: 50px;
     }
     .small-text {
-      font-size: 0.9em;
+      font-size: 0.95em;
       color: #444;
       margin-bottom: 15px;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -213,3 +221,4 @@
   </script>
 </body>
 </html>
+

@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-store" />
   <title>Ballermann Anmachspruch Generator</title>
   <style>
     body {
@@ -68,12 +69,12 @@
         transparent 20px
       );
       animation: loadingBar 1.4s linear forwards;
-      width: 100%;
+      width: 300%;
       left: 0;
     }
     @keyframes loadingBar {
       0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
+      100% { transform: translateX(0); }
     }
     #truth-section, #shot-section {
       margin-top: 50px;

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Ballermann-Anmachspruch</title>
+  <style>
+    body {
+      background-color: #fff0f5;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      font-size: 2em;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background-color: #ff69b4;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+    #spruch {
+      margin-top: 30px;
+      font-size: 1.4em;
+      color: #aa007f;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Jetzt Ballermann-Anmachspruch abholen</h1>
+  <button onclick="zeigSpruch()">Los geht’s</button>
+  <div id="spruch"></div>
+
+  <script>
+    const sprueche = [
+      "Bist du WLAN? Ich spür voll die Verbindung.",
+      "Du bist heißer als mein Sonnenbrand.",
+      "Dich würd ich sogar nüchtern küssen.",
+      "Du bist wie der Sangria-Eimer – gefährlich lecker.",
+      "Kommst du mit aufs Zimmer oder tanzen wir erst?",
+      "Bist du 'ne Happy Hour? Weil du mich komplett machst.",
+      "Meine Liebe zu dir ist wie Mallorca: laut, klebrig, unvergesslich.",
+      "Ich bin kein Fotograf, aber ich seh uns zusammen.",
+      "Mit dir würde ich sogar 'Layla' nochmal hören.",
+      "Du bist der Grund, warum ich mein Armband verloren hab."
+    ];
+
+    function zeigSpruch() {
+      const zufall = Math.floor(Math.random() * sprueche.length);
+      document.getElementById("spruch").innerText = sprueche[zufall];
+    }
+  </script>
+
+</body>
+</html>

@@ -141,5 +141,86 @@
   <div style="margin-top: 50px;">
     <button onclick="window.open('https://forms.gle/47Bvs727BKtzxNjv5', '_blank')">Gästebuch</button>
   </div>
+
+  <script>
+    const sprueche = [
+      "Ist dein Pullover aus Kamelhaar oder warum hast du so stabile Höcker?",
+      "Willst du alleinerziehende Mutter werden?",
+      "Isst du gerade Kaktuseis oder knistert’s zwischen uns?",
+      "Hast du 2 cm Platz und 15 Sekunden Zeit?",
+      "Ich bin so schlecht im Bett, das muss man erlebt haben, um es zu glauben!",
+      "Brauchst du noch einen schlechten Einfluss in deinem Leben?",
+      "Ich bin vom ADAC – ich bin hier, um dich abzuschleppen.",
+      "Ich weiß zwar nicht, wer du bist, aber ich glaube, ich würde es gerne wissen.",
+      "Kaufst du mir ein Eis? Du darfst danach auch an mir lecken.",
+      "Bist du ein Kater? Weil ich das Gefühl hab, dass ich dich morgen noch spüren werde.",
+      "Wenn du ein Cocktail wärst, wärst du definitiv 'Sex on the Beach'.",
+      "Sag mal, tanzen wir jetzt oder warten wir auf den Soundtrack unserer Lovestory?",
+      "Du kannst aufhören zu gucken, ich komm schon von alleine rüber.",
+      "Du siehst aus als wenn du gutes Frühstück machst, lass uns das testen.",
+      "Wie heißt du oder soll ich dich einfach Schatz nennen?",
+      "Mein Bett quietscht, willst du es reparieren oder nur mit mir testen?",
+      "Ich steh auf ehrliche Männer, also: Willst du nur rummachen oder auch mit mir frühstücken?",
+      "Du siehst aus als hättest du schon mal ein Rohr verlegt, leg mir auch eins.",
+      "Wenn du 'ne Pizza wärst, wär ich der Käse, der an dir klebt.",
+      "Meine Liebe ist wie dein Drink – billig, aber macht was mit dir.",
+      "Ich bin kein DJ, aber ich leg heute noch bei dir auf.",
+      "Bist du Google? Weil du alles hast, wonach ich gesucht hab.",
+      "Ich bin vom Gesundheitsamt – und du bist eindeutig zu heiß!"
+    ];
+
+    const shots = [
+      "Pfeffi", "Wodka", "Wodka Caramel", "Wodka Lemon", "Hierbas", "Palo",
+      "Tequila", "Korn", "Apfelkorn", "Doppelkorn", "Sambuca", "Asbach Uralt",
+      "Baileys", "Jägermeister", "Whiskey", "Whisky", "Kleiner Feigling",
+      "Kümmerling", "Berliner Luft", "Underberg", "Rum", "JACKPOT - Such dir was aus",
+      "Zwischenwasser (wir sind ja nicht so)"
+    ];
+
+    const wahrheitOderShot = [
+      "Mache einem Fremden ein merkwürdiges Kompliment",
+      "Gib einem Fremden ein High Five und zieh kurz vorher zurück",
+      "Ruf einen beliebigen Kontakt an: Wenn er rangeht, sag dass du gut zuhause angekommen bist, wenn nicht: Shot",
+      "Umarme jemanden aus deiner Gruppe (oder einen Fremden) 10 Sekunden lang",
+      "Versuch jemanden mit einem Anmachspruch aus dieser Seite anzumachen",
+      "Tu so, als würdest du einen Heiratsantrag machen",
+      "Trink aus dem Glas eines Freundes – ohne zu fragen.",
+      "Erzähl einer fremden Person, dass sie dein „Promi-Doppelgänger“ ist – egal wie falsch.",
+      "Stell dich neben eine fremde Gruppe, die nett aussieht und klatsch 10 Sekunden lang - kommentarlos.",
+      "Mach einem fremden Mann drei Komplimente über seine Schuhe.",
+      "Geh zur Bar (oder irgendeiner Person mit Getränk) und frag, ob du einen \"Probeschluck\" kriegst.",
+      "Frag eine fremde Person, ob sie dir ihr Lieblingsgetränk erklärt – und tu so, als wärst du total beeindruckt.",
+      "Erzähle einer Fremden Person dass du ein ganz wildes Hobby hast und denk dir was möglichst merkwürdiges aus."
+    ];
+
+    function zeigSpruch() {
+      const zufall = sprueche[Math.floor(Math.random() * sprueche.length)];
+      document.getElementById("spruch").innerText = zufall;
+    }
+
+    function zeigShot() {
+      const button = document.getElementById("shot-button");
+      button.innerText = "Was wird...";
+      setTimeout(() => {
+        const shot = shots[Math.floor(Math.random() * shots.length)];
+        document.getElementById("shot-output").innerText = shot;
+        button.innerText = "Das wird!";
+        setTimeout(() => {
+          button.innerText = "Na schauen wir mal was wird";
+        }, 3000);
+      }, 1000);
+    }
+
+    function zeigWahrheitOderShot() {
+      document.getElementById("truth-output").innerText = "";
+      const loader = document.getElementById("loader");
+      loader.style.display = "block";
+      setTimeout(() => {
+        loader.style.display = "none";
+        const aufgabe = wahrheitOderShot[Math.floor(Math.random() * wahrheitOderShot.length)];
+        document.getElementById("truth-output").innerText = aufgabe;
+      }, 1500);
+    }
+  </script>
 </body>
 </html>

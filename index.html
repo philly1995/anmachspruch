@@ -28,22 +28,6 @@
       align-items: center;
       gap: 10px;
     }
-    .nav-buttons {
-      margin: 20px 0 60px;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .nav-buttons button {
-      padding: 8px 14px;
-      font-size: 1em;
-      background-color: #aa007f;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-    }
     button {
       padding: 16px 36px;
       font-size: 1.2em;
@@ -121,9 +105,6 @@
         font-size: 1em;
         padding: 14px 20px;
       }
-      .nav-buttons button {
-        font-size: 0.95em;
-      }
       .small-text {
         font-size: 1em;
       }
@@ -136,14 +117,9 @@
 <body>
   <h1>Dieser QR-Code war deine beste Entscheidung heute!<br>Oder auch nicht. Versuch dein Glück.</h1>
 
-  <div class="nav-buttons">
-    <button onclick="document.getElementById('spruch').scrollIntoView({ behavior: 'smooth' })">Anmache</button>
-    <button onclick="document.getElementById('truth-section').scrollIntoView({ behavior: 'smooth' })">Spiel</button>
-    <button onclick="document.getElementById('shot-section').scrollIntoView({ behavior: 'smooth' })">Shot</button>
-  </div>
-
   <div class="button-container">
-    <button onclick="zeigSpruch()">Zufälligen Anmachspruch generieren</button>
+    <h2>Anmachspruch-Generator</h2>
+    <button onclick="zeigSpruchAnimiert()">Zufälligen Anmachspruch generieren</button>
   </div>
   <div id="spruch"></div>
 
@@ -158,7 +134,7 @@
 
   <div id="shot-section">
     <h2>Welcher Shot als nächstes?</h2>
-    <button id="shot-button" onclick="zeigShot()">Na schauen wir mal was wird</button>
+    <button id="shot-button" onclick="zeigShotAnimiert()">Na schauen wir mal was wird</button>
     <div id="shot-output"></div>
   </div>
 
@@ -172,6 +148,11 @@
       "Willst du alleinerziehende Mutter werden?",
       "Isst du gerade Kaktuseis oder knistert’s zwischen uns?",
       "Hast du 2 cm Platz und 15 Sekunden Zeit?",
+      "Meiner ist nicht nur besonders klein, sondern auch extra dünn",
+      "Heißt du Winnie? Weil wenn ich dich sehe denk ich mir Puuh.",
+      "Was gibt es hier noch so für Sehenswürdigkeiten - außer dich natürlich?",
+      "Wieso kann ich dich auf Spotify nicht finden? Ich hab doch nach Hottest Singles gesucht.",
+      "Eigentlich bin ich ja niemand für nur eine Nacht aber für dich mach ich ne Ausnahme.",
       "Ich bin so schlecht im Bett, das muss man erlebt haben, um es zu glauben!",
       "Brauchst du noch einen schlechten Einfluss in deinem Leben?",
       "Ich bin vom ADAC – ich bin hier, um dich abzuschleppen.",
@@ -193,11 +174,38 @@
       "Ich bin vom Gesundheitsamt – und du bist eindeutig zu heiß!"
     ];
 
+    function zeigSpruchAnimiert() {
+      let count = 0;
+      const interval = setInterval(() => {
+        const spruch = sprueche[Math.floor(Math.random() * sprueche.length)];
+        document.getElementById("spruch").textContent = spruch;
+        count++;
+        if (count >= 10) clearInterval(interval);
+      }, 100);
+    }
+
     const shots = [
-      "Pfeffi", "Wodka", "Wodka Caramel", "Wodka Lemon", "Hierbas", "Palo", "Tequila", "Korn",
-      "Apfelkorn", "Doppelkorn", "Sambuca", "Asbach Uralt", "Baileys", "Jägermeister",
-      "Whiskey", "Whisky", "Kleiner Feigling", "Kümmerling", "Berliner Luft", "Underberg",
-      "Rum", "JACKPOT - Such dir was aus", "Zwischenwasser (wir sind ja nicht so)"
+      "Tequila",
+      "Jägermeister",
+      "Sambuca",
+      "Berliner Luft",
+      "Wodka",
+      "Feigling",
+      "Ficken Likör",
+      "Kleiner Klopfer",
+      "Pfeffi",
+      "Whiskey",
+      "Korn",
+      "Underberg",
+      "Rum",
+      "JACKPOT - such dir was aus",
+      "Asback Uralt",
+      "Hierbas",
+      "Palo",
+      "Kümmerling",
+      "Baileys",
+      "Ouzo",
+      "Mexikaner"
     ];
 
     const wahrheitOderShot = [
@@ -208,7 +216,7 @@
       "Versuch jemanden mit einem Anmachspruch aus dieser Seite anzumachen",
       "Tu so, als würdest du einen Heiratsantrag machen",
       "Trink aus dem Glas eines Freundes – ohne zu fragen.",
-      "Erzähl einer fremden Person, dass sie dein „Promi-Doppelgänger“ ist – egal wie falsch.",
+      "Sag einer fremden Person, dass du wie ein Promi aussiehst - möglichst absurd.",
       "Stell dich neben eine fremde Gruppe, die nett aussieht und klatsch 10 Sekunden lang - kommentarlos.",
       "Mach einem fremden Mann drei Komplimente über seine Schuhe.",
       "Geh zur Bar (oder irgendeiner Person mit Getränk) und frag, ob du einen \"Probeschluck\" kriegst.",
@@ -216,23 +224,14 @@
       "Erzähle einer Fremden Person dass du ein ganz wildes Hobby hast und denk dir was möglichst merkwürdiges aus."
     ];
 
-    function zeigSpruch() {
-      const spruch = sprueche[Math.floor(Math.random() * sprueche.length)];
-      document.getElementById("spruch").textContent = spruch;
-    }
-
-    function zeigShot() {
-      const shot = shots[Math.floor(Math.random() * shots.length)];
-      document.getElementById("shot-output").textContent = shot;
-      const button = document.getElementById("shot-button");
-      const originalText = "Na schauen wir mal was wird";
-      button.textContent = "Was wird";
-      setTimeout(() => {
-        button.textContent = "Das wird!";
-        setTimeout(() => {
-          button.textContent = originalText;
-        }, 3000);
-      }, 1400);
+    function zeigShotAnimiert() {
+      let count = 0;
+      const interval = setInterval(() => {
+        const shot = shots[Math.floor(Math.random() * shots.length)];
+        document.getElementById("shot-output").textContent = shot;
+        count++;
+        if (count >= 10) clearInterval(interval);
+      }, 100);
     }
 
     function zeigWahrheitOderShot() {

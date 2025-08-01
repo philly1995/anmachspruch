@@ -143,7 +143,7 @@
   </div>
 
   <div style="margin-top: 80px;">
-    <p style="font-size: 0.9em; color: #666;">👀 So viele neugierige Nasen waren schon hier:</p>
+    <p style="font-size: 0.9em; color: #666;">👀 Schon ein paar Leute haben gescannt:</p>
     <a href="https://www.hitwebcounter.com" target="_blank">
       <img src="https://hitwebcounter.com/counter/counter.php?page=21288351&style=0006&nbdigits=4&type=page&initCount=0" 
            title="Counter Widget" alt="Visit counter For Websites" border="0" />
@@ -151,7 +151,106 @@
   </div>
 
   <script>
-    // JavaScript bleibt wie gehabt...
+    const sprueche = [
+      "Ist dein Pullover aus Kamelhaar oder warum hast du so stabile Höcker?",
+      "Willst du alleinerziehende Mutter werden?",
+      "Isst du gerade Kaktuseis oder knistert’s zwischen uns?",
+      "Hast du 2 cm Platz und 15 Sekunden Zeit?",
+      "Meiner ist nicht nur besonders klein, sondern auch extra dünn",
+      "Heißt du Winnie? Weil wenn ich dich sehe denk ich mir Puuh.",
+      "Was gibt es hier noch so für Sehenswürdigkeiten - außer dich natürlich?",
+      "Wieso kann ich dich auf Spotify nicht finden? Ich hab doch nach Hottest Singles gesucht.",
+      "Eigentlich bin ich ja niemand für nur eine Nacht aber für dich mach ich ne Ausnahme.",
+      "Ich bin so schlecht im Bett, das muss man erlebt haben, um es zu glauben!",
+      "Brauchst du noch einen schlechten Einfluss in deinem Leben?",
+      "Ich bin vom ADAC – ich bin hier, um dich abzuschleppen.",
+      "Ich weiß zwar nicht, wer du bist, aber ich glaube, ich würde es gerne wissen.",
+      "Kaufst du mir ein Eis? Du darfst danach auch an mir lecken.",
+      "Bist du ein Kater? Weil ich das Gefühl hab, dass ich dich morgen noch spüren werde.",
+      "Wenn du ein Cocktail wärst, wärst du definitiv 'Sex on the Beach'.",
+      "Sag mal, tanzen wir jetzt oder warten wir auf den Soundtrack unserer Lovestory?",
+      "Du kannst aufhören zu gucken, ich komm schon von alleine rüber",
+      "Du siehst aus als wenn du gutes Frühstück machst, lass uns das testen",
+      "Wie heißt du oder soll ich dich einfach Schatz nennen",
+      "Mein Bett quietscht, willst du es reparieren oder nur mit mir testen?",
+      "Ich steh auf ehrliche Männer, also: Willst du nur rummachen oder auch mit mir Frühstücken?",
+      "Du siehst aus als hättest du schon mal ein Rohr verlegt, leg mir auch eins.",
+      "Wenn du 'ne Pizza wärst, wär ich der Käse, der an dir klebt.",
+      "Meine Liebe ist wie dein Drink – billig, aber macht was mit dir.",
+      "Ich bin kein DJ, aber ich leg heute noch bei dir auf.",
+      "Bist du Google? Weil du alles hast, wonach ich gesucht hab.",
+      "Ich bin vom Gesundheitsamt – und du bist eindeutig zu heiß!"
+    ];
+
+    function zeigSpruchAnimiert() {
+      let count = 0;
+      const interval = setInterval(() => {
+        const spruch = sprueche[Math.floor(Math.random() * sprueche.length)];
+        document.getElementById("spruch").textContent = spruch;
+        count++;
+        if (count >= 10) clearInterval(interval);
+      }, 100);
+    }
+
+    const shots = [
+      "Tequila",
+      "Jägermeister",
+      "Sambuca",
+      "Berliner Luft",
+      "Wodka",
+      "Feigling",
+      "Ficken Likör",
+      "Kleiner Klopfer",
+      "Pfeffi",
+      "Whiskey",
+      "Korn",
+      "Underberg",
+      "Rum",
+      "JACKPOT - such dir was aus",
+      "Asback Uralt",
+      "Hierbas",
+      "Palo",
+      "Kümmerling",
+      "Baileys",
+      "Ouzo",
+      "Mexikaner"
+    ];
+
+    const wahrheitOderShot = [
+      "Mache einem Fremden ein merkwürdiges Kompliment",
+      "Gib einem Fremden ein High Five und zieh kurz vorher zurück",
+      "Ruf einen beliebigen Kontakt an: Wenn er rangeht, sag dass du gut zuhause angekommen bist, wenn nicht: Shot",
+      "Umarme jemanden aus deiner Gruppe (oder einen Fremden) 10 Sekunden lang",
+      "Versuch jemanden mit einem Anmachspruch aus dieser Seite anzumachen",
+      "Tu so, als würdest du einen Heiratsantrag machen",
+      "Trink aus dem Glas eines Freundes – ohne zu fragen.",
+      "Sag einer fremden Person, dass du wie ein Promi aussiehst - möglichst absurd.",
+      "Stell dich neben eine fremde Gruppe, die nett aussieht und klatsch 10 Sekunden lang - kommentarlos.",
+      "Mach einem fremden Mann drei Komplimente über seine Schuhe.",
+      "Geh zur Bar (oder irgendeiner Person mit Getränk) und frag, ob du einen \"Probeschluck\" kriegst.",
+      "Frag eine fremde Person, ob sie dir ihr Lieblingsgetränk erklärt – und tu so, als wärst du total beeindruckt.",
+      "Erzähle einer Fremden Person dass du ein ganz wildes Hobby hast und denk dir was möglichst merkwürdiges aus."
+    ];
+
+    function zeigShotAnimiert() {
+      let count = 0;
+      const interval = setInterval(() => {
+        const shot = shots[Math.floor(Math.random() * shots.length)];
+        document.getElementById("shot-output").textContent = shot;
+        count++;
+        if (count >= 10) clearInterval(interval);
+      }, 100);
+    }
+
+    function zeigWahrheitOderShot() {
+      document.getElementById("loader").style.display = "block";
+      document.getElementById("truth-output").textContent = "";
+      setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+        const aufgabe = wahrheitOderShot[Math.floor(Math.random() * wahrheitOderShot.length)];
+        document.getElementById("truth-output").textContent = aufgabe;
+      }, 1400);
+    }
   </script>
 </body>
 </html>

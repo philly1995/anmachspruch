@@ -8,65 +8,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ballermann Anmachspruch Generator</title>
   <style>
-    body { background-color: #fff0f5; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; text-align: center; padding: 40px 20px; }
-    h1 { font-size: 2em; margin-bottom: 20px; }
-    h2 { font-size: 1.6em; margin-bottom: 15px; }
-    .button-container { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-    button { padding: 16px 36px; font-size: 1.2em; background-color: #ff69b4; border: none; border-radius: 12px; color: white; cursor: pointer; width: 100%; max-width: 320px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    body { background-color: #fff0f5; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; text-align: center; padding: 36px 16px; }
+    h1 { font-size: 2em; margin-bottom: 16px; }
+    h2 { font-size: 1.6em; margin: 0 0 10px 0; }
+
+    /* kompaktere Abstände zwischen Sektionen */
+    .section { margin-top: 48px; }
+    @media (min-width: 768px) { .section { margin-top: 64px; } }
+
+    .button-container { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    button { padding: 16px 36px; font-size: 1.1em; background-color: #ff69b4; border: none; border-radius: 12px; color: white; cursor: pointer; width: 100%; max-width: 320px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
     button:active { transform: scale(0.96); box-shadow: 0 0 10px #ff69b4aa; }
     button[disabled] { opacity: .65; cursor: not-allowed; }
 
-    /* Alte Text-Ausgaben bleiben verborgen (wir nutzen Popups) */
-    #spruch, #shot-output, #truth-output { display: none; }
-
-    /* --- Modal Basis --- */
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
-    .modal { background: #fff; border-radius: 16px; padding: 22px; max-width: 520px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,.25); text-align: left; }
+    /* --- Modal & Animationen (langsam/spannend) --- */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; opacity: 0; }
+    .modal { background: #fff; border-radius: 16px; padding: 22px; max-width: 520px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,.25); text-align: left; opacity: 0; transform: translateY(28px) scale(0.97); }
+    .show { display: flex !important; animation: backdropFadeSlow 900ms ease forwards; }
+    .show .modal { animation: popSlow 1200ms ease forwards; }
     .modal h3 { margin: 0 0 10px; font-size: 1.4em; color: #aa007f; }
     .modal p { margin: 0 0 18px; color: #333; line-height: 1.5; }
-    .modal .actions { display: flex; justify-content: flex-end; gap: 10px; }
-    .modal .actions button { background: #ff69b4; border-radius: 10px; padding: 12px 18px; font-size: 1em; }
-    .show { display: flex !important; }
-
-    /* --- Langsame, spannende Animation: Spruch, Truth, Shot --- */
-    #spruch-backdrop, #truth-backdrop, #shot-backdrop, #cheat-backdrop, #coach-backdrop { opacity: 0; }
-    #spruch-backdrop.show, #truth-backdrop.show, #shot-backdrop.show, #cheat-backdrop.show, #coach-backdrop.show { animation: backdropFadeSlow 900ms ease forwards; }
-    #spruch-backdrop .modal, #truth-backdrop .modal, #shot-backdrop .modal, #cheat-backdrop .modal, #coach-backdrop .modal { opacity: 0; transform: translateY(28px) scale(0.97); }
-    #spruch-backdrop.show .modal, #truth-backdrop.show .modal, #shot-backdrop.show .modal, #cheat-backdrop.show .modal, #coach-backdrop.show .modal { animation: popSlow 1200ms ease forwards; }
+    .actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .actions button { background: #ff69b4; border-radius: 10px; padding: 12px 18px; font-size: 1em; }
 
     @keyframes backdropFadeSlow { from { opacity: 0; } to { opacity: 1; } }
     @keyframes popSlow { 0% { opacity: 0; transform: translateY(28px) scale(0.97);} 70% { opacity: 1; transform: translateY(-4px) scale(1.02);} 100% { opacity: 1; transform: translateY(0) scale(1);} }
 
     @media (prefers-reduced-motion: reduce) {
-      #spruch-backdrop.show, #truth-backdrop.show, #shot-backdrop.show, #cheat-backdrop.show, #coach-backdrop.show { animation: none; opacity: 1; }
-      #spruch-backdrop.show .modal, #truth-backdrop.show .modal, #shot-backdrop.show .modal, #cheat-backdrop.show .modal, #coach-backdrop.show .modal { animation: none; opacity: 1; transform: none; }
+      .show { animation: none; opacity: 1; }
+      .show .modal { animation: none; opacity: 1; transform: none; }
     }
+
+    /* Alte Inline-Ausgaben sind obsolet */
+    #spruch, #shot-output, #truth-output, #loader { display: none; }
   </style>
 </head>
 <body>
   <h1>Dieser QR-Code war deine beste Entscheidung heute!<br/>Oder auch nicht. Versuch dein Glück.</h1>
 
-  <div class="button-container">
+  <!-- Anmachspruch -->
+  <div id="spruch-section" class="section button-container">
     <h2>Anmachspruch-Generator</h2>
     <button id="spruch-btn" onclick="zeigSpruch()">Zufälligen Anmachspruch generieren</button>
   </div>
-  <div id="spruch" aria-live="polite"></div>
 
-  <div id="truth-section" style="margin-top: 140px;">
+  <!-- Pflicht oder Shot -->
+  <div id="truth-section" class="section button-container">
     <h2>Pflicht oder Shot</h2>
-    <div class="small-text">Erfülle die Aufgabe oder trink einen Shot (oder einen großen Schluck deines Getränks). Du weißt nicht welchen Shot du trinken willst? Dann lass den Zufall unten entscheiden!</div>
     <button id="truth-btn" onclick="zeigAufgabe()">Zeig mir meine Aufgabe</button>
-    <div id="loader"></div>
-    <div id="truth-output" aria-live="polite"></div>
+    <div class="small-text" style="font-size: 0.95em; color:#444;">Erfülle die Aufgabe oder trink einen Shot (oder einen großen Schluck deines Getränks). Du weißt nicht welchen Shot du trinken willst? Dann lass den Zufall unten entscheiden!</div>
   </div>
 
-  <div id="shot-section" style="margin-top: 140px;">
+  <!-- Shots -->
+  <div id="shot-section" class="section button-container">
     <h2>Welcher Shot als nächstes?</h2>
     <button id="shot-button" onclick="zeigShot()">Na schauen wir mal was wird</button>
-    <div id="shot-output" aria-live="polite"></div>
   </div>
 
-  <!-- Spruch-Popup -->
+  <!-- Gästebuch (externer Link wie im Original) -->
+  <div id="guestbook-section" class="section button-container">
+    <h2>Gästebuch</h2>
+    <button onclick="window.open('https://forms.gle/47Bvs727BKtzxNjv5','_blank')">Gästebuch öffnen</button>
+  </div>
+
+  <!-- Modals -->
   <div id="spruch-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="spruch-title" aria-describedby="spruch-text">
     <div class="modal">
       <h3 id="spruch-title">Dein Spruch</h3>
@@ -75,7 +80,6 @@
     </div>
   </div>
 
-  <!-- Coach-Popup (Anmachspruch nach 10 Klicks) -->
   <div id="coach-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="coach-title" aria-describedby="coach-text">
     <div class="modal">
       <h3 id="coach-title">Zeit für Mut!</h3>
@@ -84,7 +88,6 @@
     </div>
   </div>
 
-  <!-- Shot-Popup (normale Ziehung) -->
   <div id="shot-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="shot-title" aria-describedby="shot-text">
     <div class="modal">
       <h3 id="shot-title">Dein Shot</h3>
@@ -93,7 +96,6 @@
     </div>
   </div>
 
-  <!-- Cheat-Popup (jedes 5. Mal Shots) -->
   <div id="cheat-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="cheat-title" aria-describedby="cheat-text">
     <div class="modal">
       <h3 id="cheat-title">Erwischt!</h3>
@@ -102,7 +104,6 @@
     </div>
   </div>
 
-  <!-- Truth/Task-Popup -->
   <div id="truth-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="truth-title" aria-describedby="truth-text">
     <div class="modal">
       <h3 id="truth-title">Deine Aufgabe</h3>
@@ -112,7 +113,7 @@
   </div>
 
   <script>
-    // --- Daten (vollständig) ---
+    // --- Daten (vollständig, wie im Original) ---
     const sprueche = [
       "Ist dein Pullover aus Kamelhaar oder warum hast du so stabile Höcker?",
       "Willst du alleinerziehende Mutter werden?",
@@ -252,17 +253,35 @@
       const final = pickDifferent(wahrheitOderShot, lastTruth); lastTruth = final; showTruthModal(final); btn.disabled = false;
     }
 
-    // --- Mini-Tests in der Konsole ---
+    // --- Tests ---
     function runBasicTests(){
       try {
         console.log('[Tests] start');
-        // pickDifferent kein unmittelbarer Repeat
-        let last = 'x'; for (let i=0;i<20;i++){ const v = pickDifferent(['x','y','z'], last); if(v===last){ console.warn('Repeat on try', i);} last=v; }
-        // Coach beim 11. Spruch
+        // pickDifferent: keine direkte Wiederholung über mehrere Kategorien
+        (function(){
+          const categories = [
+            {arr: ['x','y','z'], name: 'generic'},
+            {arr: ['A','B','C','D'], name: 'generic2'}
+          ];
+          categories.forEach(cat => {
+            let last = cat.arr[0];
+            for (let i=0;i<50;i++) {
+              const v = pickDifferent(cat.arr, last);
+              if (v === last) console.error('Repeat detected in', cat.name, 'iteration', i);
+              last = v;
+            }
+          });
+        })();
+
+        // Coach beim 11. Spruch (einmalig)
         spruchClickCount = 0; coachShown = false; for(let i=0;i<10;i++){ zeigSpruch(); }
         zeigSpruch(); if (!coachShown) console.error('Coach modal sollte beim 11. Klick erscheinen');
+
         // Cheat jeder 5. Shot
-        shotClickCount = 0; for(let i=1;i<=10;i++){ zeigShot(); if (i%5===0) console.log('Cheat shown on', i); }
+        shotClickCount = 0; for(let i=1;i<=10;i++){ zeigShot(); if (i%5===0) { /* shows cheat modal */ } }
+
+        // Truth zieht Aufgabe + zeigt Modal
+        lastTruth = null; zeigAufgabe();
         console.log('[Tests] done');
       } catch(e) { console.error('[Tests] failed', e); }
     }

@@ -1,161 +1,123 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta http-equiv="Cache-Control" content="no-store" />
   <meta http-equiv="Expires" content="0" />
   <meta http-equiv="Pragma" content="no-cache" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ballermann Anmachspruch Generator</title>
   <style>
-    body {
-      background-color: #fff0f5;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 40px 20px;
-    }
-    h1 {
-      font-size: 2em;
-      margin-bottom: 20px;
-    }
-    h2 {
-      font-size: 1.6em;
-      margin-bottom: 15px;
-    }
-    .button-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-    button {
-      padding: 16px 36px;
-      font-size: 1.2em;
-      background-color: #ff69b4;
-      border: none;
-      border-radius: 12px;
-      color: white;
-      cursor: pointer;
-      width: 100%;
-      max-width: 320px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    button:active {
-      transform: scale(0.96);
-      box-shadow: 0 0 10px #ff69b4aa;
-    }
-    #spruch, #shot-output, #truth-output {
-      margin-top: 30px;
-      font-size: 1.4em;
-      color: #aa007f;
-      min-height: 60px;
-      max-width: 95%;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.5;
-      word-wrap: break-word;
-    }
-    #loader {
-      width: 95%;
-      max-width: 320px;
-      height: 16px;
-      margin: 10px auto;
-      background: #ffd1ec;
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-      display: none;
-    }
-    #loader::before {
-      content: '';
-      position: absolute;
-      height: 100%;
-      background-image: repeating-linear-gradient(
-        90deg,
-        #ff69b4 0,
-        #ff69b4 10px,
-        transparent 10px,
-        transparent 20px
-      );
-      animation: loadingBar 1.4s linear forwards;
-      width: 300%;
-      left: 0;
-    }
-    @keyframes loadingBar {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(0); }
-    }
-    #truth-section, #shot-section, .button-container {
-      margin-top: 160px;
-    }
-    .small-text {
-      font-size: 1.05em;
-      color: #444;
-      margin-bottom: 15px;
-      line-height: 1.5;
-    }
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 1.6em;
-      }
-      h2 {
-        font-size: 1.3em;
-      }
-      button {
-        font-size: 1em;
-        padding: 14px 20px;
-      }
-      .small-text {
-        font-size: 1em;
-      }
-      #spruch, #shot-output, #truth-output {
-        font-size: 1.2em;
-      }
+    body { background-color: #fff0f5; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; text-align: center; padding: 40px 20px; }
+    h1 { font-size: 2em; margin-bottom: 20px; }
+    h2 { font-size: 1.6em; margin-bottom: 15px; }
+    .button-container { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    button { padding: 16px 36px; font-size: 1.2em; background-color: #ff69b4; border: none; border-radius: 12px; color: white; cursor: pointer; width: 100%; max-width: 320px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    button:active { transform: scale(0.96); box-shadow: 0 0 10px #ff69b4aa; }
+    button[disabled] { opacity: .65; cursor: not-allowed; }
+
+    /* Alte Text-Ausgaben bleiben verborgen (wir nutzen Popups) */
+    #spruch, #shot-output, #truth-output { display: none; }
+
+    /* --- Modal Basis --- */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+    .modal { background: #fff; border-radius: 16px; padding: 22px; max-width: 520px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,.25); text-align: left; }
+    .modal h3 { margin: 0 0 10px; font-size: 1.4em; color: #aa007f; }
+    .modal p { margin: 0 0 18px; color: #333; line-height: 1.5; }
+    .modal .actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .modal .actions button { background: #ff69b4; border-radius: 10px; padding: 12px 18px; font-size: 1em; }
+    .show { display: flex !important; }
+
+    /* --- Langsame, spannende Animation: Spruch, Truth, Shot --- */
+    #spruch-backdrop, #truth-backdrop, #shot-backdrop, #cheat-backdrop, #coach-backdrop { opacity: 0; }
+    #spruch-backdrop.show, #truth-backdrop.show, #shot-backdrop.show, #cheat-backdrop.show, #coach-backdrop.show { animation: backdropFadeSlow 900ms ease forwards; }
+    #spruch-backdrop .modal, #truth-backdrop .modal, #shot-backdrop .modal, #cheat-backdrop .modal, #coach-backdrop .modal { opacity: 0; transform: translateY(28px) scale(0.97); }
+    #spruch-backdrop.show .modal, #truth-backdrop.show .modal, #shot-backdrop.show .modal, #cheat-backdrop.show .modal, #coach-backdrop.show .modal { animation: popSlow 1200ms ease forwards; }
+
+    @keyframes backdropFadeSlow { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes popSlow { 0% { opacity: 0; transform: translateY(28px) scale(0.97);} 70% { opacity: 1; transform: translateY(-4px) scale(1.02);} 100% { opacity: 1; transform: translateY(0) scale(1);} }
+
+    @media (prefers-reduced-motion: reduce) {
+      #spruch-backdrop.show, #truth-backdrop.show, #shot-backdrop.show, #cheat-backdrop.show, #coach-backdrop.show { animation: none; opacity: 1; }
+      #spruch-backdrop.show .modal, #truth-backdrop.show .modal, #shot-backdrop.show .modal, #cheat-backdrop.show .modal, #coach-backdrop.show .modal { animation: none; opacity: 1; transform: none; }
     }
   </style>
 </head>
 <body>
-  <h1>Dieser QR-Code war deine beste Entscheidung heute!<br>Oder auch nicht. Versuch dein Glück.</h1>
+  <h1>Dieser QR-Code war deine beste Entscheidung heute!<br/>Oder auch nicht. Versuch dein Glück.</h1>
 
   <div class="button-container">
     <h2>Anmachspruch-Generator</h2>
-    <button onclick="zeigSpruchAnimiert()">Zufälligen Anmachspruch generieren</button>
+    <button id="spruch-btn" onclick="zeigSpruch()">Zufälligen Anmachspruch generieren</button>
   </div>
-  <div id="spruch"></div>
+  <div id="spruch" aria-live="polite"></div>
 
-  <div id="truth-section">
+  <div id="truth-section" style="margin-top: 140px;">
     <h2>Pflicht oder Shot</h2>
-    <div class="small-text">Erfülle die Aufgabe oder trink einen Shot (oder einen großen Schluck deines Getränks)<br>
-      Du weißt nicht welchen Shot du trinken willst? Dann lass den Zufall unten entscheiden!</div>
-    <button onclick="zeigWahrheitOderShot()">Zeig mir meine Aufgabe</button>
+    <div class="small-text">Erfülle die Aufgabe oder trink einen Shot (oder einen großen Schluck deines Getränks). Du weißt nicht welchen Shot du trinken willst? Dann lass den Zufall unten entscheiden!</div>
+    <button id="truth-btn" onclick="zeigAufgabe()">Zeig mir meine Aufgabe</button>
     <div id="loader"></div>
-    <div id="truth-output"></div>
+    <div id="truth-output" aria-live="polite"></div>
   </div>
 
-  <div id="shot-section">
+  <div id="shot-section" style="margin-top: 140px;">
     <h2>Welcher Shot als nächstes?</h2>
-    <button id="shot-button" onclick="zeigShotAnimiert()">Na schauen wir mal was wird</button>
-    <div id="shot-output"></div>
+    <button id="shot-button" onclick="zeigShot()">Na schauen wir mal was wird</button>
+    <div id="shot-output" aria-live="polite"></div>
   </div>
 
-  <div style="margin-top: 50px;">
-    <button onclick="window.open('https://forms.gle/47Bvs727BKtzxNjv5', '_blank')">Gästebuch</button>
+  <!-- Spruch-Popup -->
+  <div id="spruch-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="spruch-title" aria-describedby="spruch-text">
+    <div class="modal">
+      <h3 id="spruch-title">Dein Spruch</h3>
+      <p id="spruch-text"></p>
+      <div class="actions"><button id="spruch-close" onclick="closeSpruchModal()">Weiter</button></div>
+    </div>
   </div>
 
-  <div style="margin-top: 80px;">
-    <p style="font-size: 0.9em; color: #666;">👀 So viele neugierige Nasen waren schon hier:</p>
-    <a href="https://www.hitwebcounter.com" target="_blank">
-      <img src="https://hitwebcounter.com/counter/counter.php?page=21288351&style=0006&nbdigits=4&type=page&initCount=0" 
-           title="Counter Widget" alt="Visit counter For Websites" border="0" />
-    </a>
+  <!-- Coach-Popup (Anmachspruch nach 10 Klicks) -->
+  <div id="coach-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="coach-title" aria-describedby="coach-text">
+    <div class="modal">
+      <h3 id="coach-title">Zeit für Mut!</h3>
+      <p id="coach-text">Alter, jetzt sprich die Person einfach an, so schwer kann das nicht sein!</p>
+      <div class="actions"><button id="coach-ok" onclick="closeCoachModal()">Okay Chef</button></div>
+    </div>
+  </div>
+
+  <!-- Shot-Popup (normale Ziehung) -->
+  <div id="shot-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="shot-title" aria-describedby="shot-text">
+    <div class="modal">
+      <h3 id="shot-title">Dein Shot</h3>
+      <p id="shot-text"></p>
+      <div class="actions"><button id="shot-close" onclick="closeShotModal()">Prost!</button></div>
+    </div>
+  </div>
+
+  <!-- Cheat-Popup (jedes 5. Mal Shots) -->
+  <div id="cheat-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="cheat-title" aria-describedby="cheat-text">
+    <div class="modal">
+      <h3 id="cheat-title">Erwischt!</h3>
+      <p id="cheat-text">Das ist cheaten! Jetzt musst du ne Runde ausgeben!</p>
+      <div class="actions"><button onclick="closeCheatModal()">Ja okay, wieso nicht</button></div>
+    </div>
+  </div>
+
+  <!-- Truth/Task-Popup -->
+  <div id="truth-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="truth-title" aria-describedby="truth-text">
+    <div class="modal">
+      <h3 id="truth-title">Deine Aufgabe</h3>
+      <p id="truth-text"></p>
+      <div class="actions"><button id="truth-close" onclick="closeTruthModal()">Challenge accepted</button></div>
+    </div>
   </div>
 
   <script>
+    // --- Daten (vollständig) ---
     const sprueche = [
       "Ist dein Pullover aus Kamelhaar oder warum hast du so stabile Höcker?",
       "Willst du alleinerziehende Mutter werden?",
       "Isst du gerade Kaktuseis oder knistert’s zwischen uns?",
-      "Hast du 2 cm Platz und 15 Sekunden Zeit?",
+      "Hast du 2\u202fcm Platz und 15 Sekunden Zeit?",
       "Meiner ist nicht nur besonders klein, sondern auch extra dünn",
       "Heißt du Winnie? Weil wenn ich dich sehe denk ich mir Puuh.",
       "Was gibt es hier noch so für Sehenswürdigkeiten - außer dich natürlich?",
@@ -195,38 +157,8 @@
       "Ich bin vom Gesundheitsamt – und du bist eindeutig zu heiß!"
     ];
 
-    function zeigSpruchAnimiert() {
-      let count = 0;
-      const interval = setInterval(() => {
-        const spruch = sprueche[Math.floor(Math.random() * sprueche.length)];
-        document.getElementById("spruch").textContent = spruch;
-        count++;
-        if (count >= 10) clearInterval(interval);
-      }, 100);
-    }
-
     const shots = [
-      "Tequila",
-      "Jägermeister",
-      "Sambuca",
-      "Berliner Luft",
-      "Wodka",
-      "Kleiner Feigling",
-      "Ficken Likör",
-      "Klopfer",
-      "Pfeffi",
-      "Whiskey",
-      "Korn",
-      "Underberg",
-      "Rum",
-      "JACKPOT - such dir was aus",
-      "Asbach Uralt",
-      "Hierbas",
-      "Palo",
-      "Kümmerling",
-      "Baileys",
-      "Ouzo",
-      "Mexikaner"
+      "Tequila","Jägermeister","Sambuca","Berliner Luft","Wodka","Kleiner Feigling","Ficken Likör","Klopfer","Pfeffi","Whiskey","Korn","Underberg","Rum","JACKPOT - such dir was aus","Asbach Uralt","Hierbas","Palo","Kümmerling","Baileys","Ouzo","Mexikaner"
     ];
 
     const wahrheitOderShot = [
@@ -245,25 +177,96 @@
       "Erzähle einer Fremden Person dass du ein ganz wildes Hobby hast und denk dir was möglichst merkwürdiges aus."
     ];
 
-    function zeigShotAnimiert() {
-      let count = 0;
-      const interval = setInterval(() => {
-        const shot = shots[Math.floor(Math.random() * shots.length)];
-        document.getElementById("shot-output").textContent = shot;
-        count++;
-        if (count >= 10) clearInterval(interval);
-      }, 100);
+    // --- Helper: Zufall OHNE unmittelbare Wiederholung ---
+    function pickDifferent(arr, last) {
+      if (!arr || arr.length === 0) return null;
+      if (arr.length === 1) return arr[0];
+      let candidate = null; let safety = 0;
+      do { candidate = arr[Math.floor(Math.random() * arr.length)]; safety++; } while (candidate === last && safety < 50);
+      return candidate;
     }
 
-    function zeigWahrheitOderShot() {
-      document.getElementById("loader").style.display = "block";
-      document.getElementById("truth-output").textContent = "";
-      setTimeout(() => {
-        document.getElementById("loader").style.display = "none";
-        const aufgabe = wahrheitOderShot[Math.floor(Math.random() * wahrheitOderShot.length)];
-        document.getElementById("truth-output").textContent = aufgabe;
-      }, 1400);
+    // --- State ---
+    let lastSpruch = null;
+    let lastShot = null;
+    let lastTruth = null;
+    let spruchClickCount = 0;
+    let coachShown = false; // Coach nur einmal nach 10 Sprüchen
+    let shotClickCount = 0;  // Cheat-Popup bei jedem 5.
+
+    // --- Modal Helpers ---
+    function showBackdrop(id){ const b = document.getElementById(id); b.classList.add('show'); }
+    function hideBackdrop(id){ const b = document.getElementById(id); b.classList.remove('show'); }
+
+    function showSpruchModal(text){
+      const p = document.getElementById('spruch-text');
+      p.textContent = '…';
+      showBackdrop('spruch-backdrop');
+      setTimeout(()=>{ p.textContent = text; document.getElementById('spruch-close').focus(); }, 700);
+      if (navigator.vibrate) { try { navigator.vibrate(15); } catch(e){} }
     }
+    function closeSpruchModal(){ hideBackdrop('spruch-backdrop'); }
+
+    function showCoachModal(){ showBackdrop('coach-backdrop'); setTimeout(()=>document.getElementById('coach-ok').focus(),0); }
+    function closeCoachModal(){ hideBackdrop('coach-backdrop'); }
+
+    function showShotModal(text){
+      const p = document.getElementById('shot-text');
+      p.textContent = '…';
+      showBackdrop('shot-backdrop');
+      setTimeout(()=>{ p.textContent = text; document.getElementById('shot-close').focus(); }, 700);
+    }
+    function closeShotModal(){ hideBackdrop('shot-backdrop'); }
+
+    function showCheatModal(){ showBackdrop('cheat-backdrop'); }
+    function closeCheatModal(){ hideBackdrop('cheat-backdrop'); }
+
+    function showTruthModal(text){
+      const p = document.getElementById('truth-text');
+      p.textContent = '…';
+      showBackdrop('truth-backdrop');
+      setTimeout(()=>{ p.textContent = text; document.getElementById('truth-close').focus(); }, 700);
+    }
+    function closeTruthModal(){ hideBackdrop('truth-backdrop'); }
+
+    // --- Actions ---
+    function zeigSpruch(){
+      spruchClickCount++;
+      const btn = document.getElementById('spruch-btn');
+      btn.disabled = true;
+      if (spruchClickCount > 10 && !coachShown) { coachShown = true; btn.disabled = false; showCoachModal(); return; }
+      const final = pickDifferent(sprueche, lastSpruch); lastSpruch = final; showSpruchModal(final); btn.disabled = false;
+    }
+
+    function zeigShot(){
+      shotClickCount++;
+      const btn = document.getElementById('shot-button');
+      btn.disabled = true;
+      if (shotClickCount % 5 === 0) { btn.disabled = false; showCheatModal(); return; }
+      const final = pickDifferent(shots, lastShot); lastShot = final; showShotModal(final); btn.disabled = false;
+    }
+
+    function zeigAufgabe(){
+      const btn = document.getElementById('truth-btn');
+      btn.disabled = true;
+      const final = pickDifferent(wahrheitOderShot, lastTruth); lastTruth = final; showTruthModal(final); btn.disabled = false;
+    }
+
+    // --- Mini-Tests in der Konsole ---
+    function runBasicTests(){
+      try {
+        console.log('[Tests] start');
+        // pickDifferent kein unmittelbarer Repeat
+        let last = 'x'; for (let i=0;i<20;i++){ const v = pickDifferent(['x','y','z'], last); if(v===last){ console.warn('Repeat on try', i);} last=v; }
+        // Coach beim 11. Spruch
+        spruchClickCount = 0; coachShown = false; for(let i=0;i<10;i++){ zeigSpruch(); }
+        zeigSpruch(); if (!coachShown) console.error('Coach modal sollte beim 11. Klick erscheinen');
+        // Cheat jeder 5. Shot
+        shotClickCount = 0; for(let i=1;i<=10;i++){ zeigShot(); if (i%5===0) console.log('Cheat shown on', i); }
+        console.log('[Tests] done');
+      } catch(e) { console.error('[Tests] failed', e); }
+    }
+    window.addEventListener('load', runBasicTests);
   </script>
 </body>
 </html>

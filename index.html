@@ -39,7 +39,7 @@
       .show .modal { animation: none; opacity: 1; transform: none; }
     }
 
-    /* Alte Inline-Ausgaben sind obsolet */
+    /* alte Inline-Ausgaben sind obsolet */
     #spruch, #shot-output, #truth-output, #loader { display: none; }
   </style>
 </head>
@@ -83,8 +83,8 @@
   <div id="coach-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="coach-title" aria-describedby="coach-text">
     <div class="modal">
       <h3 id="coach-title">Zeit für Mut!</h3>
-      <p id="coach-text">Alter, jetzt sprich die Person einfach an, so schwer kann das nicht sein!</p>
-      <div class="actions"><button id="coach-ok" onclick="closeCoachModal()">Okay Chef</button></div>
+      <p id="coach-text">Hey, jetzt sprich die Person einfach an – so schwer kann das nicht sein!</p>
+      <div class="actions"><button id="coach-ok" onclick="closeCoachModal()">Okay Chef!</button></div>
     </div>
   </div>
 
@@ -100,7 +100,7 @@
     <div class="modal">
       <h3 id="cheat-title">Erwischt!</h3>
       <p id="cheat-text">Das ist cheaten! Jetzt musst du ne Runde ausgeben!</p>
-      <div class="actions"><button onclick="closeCheatModal()">Ja okay, wieso nicht</button></div>
+      <div class="actions"><button onclick="closeCheatModal()">Okay, du hast ja recht.</button></div>
     </div>
   </div>
 
@@ -113,7 +113,7 @@
   </div>
 
   <script>
-    // --- Daten (vollständig, wie im Original) ---
+    // --- Daten ---
     const sprueche = [
       "Ist dein Pullover aus Kamelhaar oder warum hast du so stabile Höcker?",
       "Willst du alleinerziehende Mutter werden?",
@@ -253,39 +253,45 @@
       const final = pickDifferent(wahrheitOderShot, lastTruth); lastTruth = final; showTruthModal(final); btn.disabled = false;
     }
 
-    // --- Tests ---
+    // --- Tests --- (UI-Tests nur manuell; Pure-Tests immer und ohne Popups)
     function runBasicTests(){
       try {
         console.log('[Tests] start');
-        // pickDifferent: keine direkte Wiederholung über mehrere Kategorien
-        (function(){
-          const categories = [
-            {arr: ['x','y','z'], name: 'generic'},
-            {arr: ['A','B','C','D'], name: 'generic2'}
-          ];
-          categories.forEach(cat => {
-            let last = cat.arr[0];
-            for (let i=0;i<50;i++) {
-              const v = pickDifferent(cat.arr, last);
-              if (v === last) console.error('Repeat detected in', cat.name, 'iteration', i);
-              last = v;
-            }
-          });
-        })();
-
         // Coach beim 11. Spruch (einmalig)
         spruchClickCount = 0; coachShown = false; for(let i=0;i<10;i++){ zeigSpruch(); }
         zeigSpruch(); if (!coachShown) console.error('Coach modal sollte beim 11. Klick erscheinen');
-
         // Cheat jeder 5. Shot
-        shotClickCount = 0; for(let i=1;i<=10;i++){ zeigShot(); if (i%5===0) { /* shows cheat modal */ } }
-
+        shotClickCount = 0; for(let i=1;i<=10;i++){ zeigShot(); }
         // Truth zieht Aufgabe + zeigt Modal
         lastTruth = null; zeigAufgabe();
         console.log('[Tests] done');
       } catch(e) { console.error('[Tests] failed', e); }
     }
-    window.addEventListener('load', runBasicTests);
+
+    function runPureTests(){
+      try {
+        console.log('[PureTests] start');
+        let last = 'x';
+        for (let i=0; i<100; i++) {
+          const v = pickDifferent(['x','y','z'], last);
+          if (v === last) console.error('Pure repeat on iteration', i);
+          last = v;
+        }
+        console.log('[PureTests] done');
+      } catch(e){ console.error('[PureTests] failed', e); }
+    }
+
+    function shouldRunTests(){
+      try {
+        const url = new URL(window.location.href);
+        return url.searchParams.get('test') === '1' || window.location.hash.includes('debug');
+      } catch(e){ return false; }
+    }
+
+    window.addEventListener('load', () => {
+      if (shouldRunTests()) { runBasicTests(); } // UI-Tests nur mit ?test=1 oder #debug
+      runPureTests();                             // immer, öffnet keine Popups
+    });
   </script>
 </body>
 </html>

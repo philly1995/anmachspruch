@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Emoji Dodge 😅</title>
+  <style>
+    :root{
+      --bg:#0f0f14; --fg:#eaeaf0; --accent:#8b5cf6; --good:#10b981; --bad:#ef4444; --gold:#fbbf24; --blue:#60a5fa;
+    }
+    *{box-sizing:border-box;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial}
+    body{margin:0;background:radial-gradient(1200px 600px at 50% -200px, #1b1b28, var(--bg));color:var(--fg);display:grid;place-items:center;min-height:100svh;}
+    .wrap{display:grid;gap:12px;padding:16px;width:min(820px,100%)}
+    h1{margin:0;font-weight:800;letter-spacing:.2px;font-size:clamp(18px,4vw,26px)}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{appearance:none;border:0;border-radius:14px;padding:10px 14px;background:#1f1f2e;color:var(--fg);cursor:pointer;font-weight:700;box-shadow:0 6px 14px rgba(0,0,0,.3);}
+    .btn:hover{background:#24243a}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),#22d3ee);color:#0a0a0f}
+    .btn.good{background:linear-gradient(135deg,var(--good),#34d399);color:#06110b}
+    .stat{padding:8px 12px;background:#171726;border-radius:12px;font-variant-numeric:tabular-nums}
+    canvas{background:linear-gradient(#0b0b12,#0a0a0f);width:100%;height:auto;border-radius:18px;box-shadow:0 12px 28px rgba(0,0,0,.45);touch-action:none}
+    .mobile{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .mobile .btn{padding:14px 0;font-size:18px}
+    .hint{opacity:.75;font-size:14px}
+    .toast{position:fixed;inset:auto 12px 12px auto;background:#111827;color:#e5e7eb;padding:10px 12px;border-radius:10px;opacity:.92}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Emoji Dodge 😅 <small style="opacity:.7;font-weight:500">– weiche 🍺 aus, sammle 🟡 & sichere 🔵</small></h1>
+    <div class="row">
+      <button id="startBtn" class="btn primary">▶️ Start</button>
+      <button id="pauseBtn" class="btn">⏸️ Pause</button>
+      <button id="resetBtn" class="btn">🔁 Reset</button>
+      <button id="malleBtn" class="btn good" title="Malle-Modus: Hindernisse sind 🍺">🍺 Malle</button>
+      <span class="stat">Score: <b id="score">0</b></span>
+      <span class="stat">Best: <b id="best">0</b></span>
+      <span class="stat">Level: <b id="level">1</b></span>
+      <span class="stat">🛡️: <b id="shield">0s</b></span>
+    </div>
+
+    <canvas id="game" width="540" height="720" aria-label="Spielfeld" role="img"></canvas>
+
+    <div class="mobile">
+      <button class="btn" id="leftBtn">⬅️ Links</button>
+      <button class="btn" id="rightBtn">Rechts ➡️</button>
+    </div>
+    <p class="hint">Steuerung: ⬅️➡️ zum Bewegen. Sammle 🟡 (+10 Punkte), 🔵 gibt für 10s ein Schild (durchbricht Hindernisse). Treffer ohne Schild = Game Over. <br/>Tipp: Mit <b>M</b> schaltest du den <b>Malle-Modus</b> um 🍺.</p>
+  </div>
+  <div class="toast" id="toast" hidden></div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    // Game state
+    let running = false, paused = false, last = 0, acc = 0;
+    let player, items, obstacles, score, level, malle=false, shieldMs = 0, best=Number(localStorage.getItem('emojiDodgeBest')||0);
+
+    // UI els
+    const sScore = document.getElementById('score');
+    const sBest = document.getElementById('best');
+    const sLevel = document.getElementById('level');
+    const sShield = document.getElementById('shield');
+    sBest.textContent = best;
+
+    // Entities
+    const EMOJI = {
+      player:'🚗', coin:'🟡', shield:'🔵', wall:'🧱', beer:'🍺', boom:'💥'
+    };
+
+    function reset(){
+      player = {x: W/2, y: H-70, w: 40, h: 40, speed: 5};
+      items = []; obstacles = []; score = 0; level = 1; shieldMs = 0; acc=0; last=0; paused=false;
+      for(let i=0;i<6;i++) spawnObstacle(true);
+      for(let i=0;i<2;i++) spawnCoin(true);
+      spawnShield(true);
+      updateHUD();
+    }
+
+    function updateHUD(){
+      sScore.textContent = Math.floor(score);
+      sLevel.textContent = level;
+      sShield.textContent = (shieldMs/1000).toFixed(0)+"s";
+    }
+
+    function rand(a,b){return a+Math.random()*(b-a)}
+    function spawnObstacle(init=false){
+      const size = rand(26, 42);
+      const o = {x: rand(26, W-26), y: init? rand(-H, -30): -30, w:size, h:size, vy: rand(2+level*0.5, 3.5+level), type: 'ob'};
+      obstacles.push(o);
+    }
+    function spawnCoin(init=false){
+      const c = {x: rand(20, W-20), y: init? rand(-H, -20): -20, w:30, h:30, vy: rand(2, 3.5), type:'coin'};
+      items.push(c);
+    }
+    function spawnShield(init=false){
+      const c = {x: rand(20, W-20), y: init? rand(-H*1.5, -20): -20, w:30, h:30, vy: rand(2, 3.2), type:'shield'};
+      items.push(c);
+    }
+
+    function rectsOverlap(a,b){return Math.abs((a.x)-(b.x)) < (a.w/2+b.w/2) && Math.abs((a.y)-(b.y)) < (a.h/2+b.h/2)}
+
+    // Input
+    const keys = new Set();
+    window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','KeyM','Space'].includes(e.code)) e.preventDefault();
+      if(e.code==='ArrowLeft') keys.add('L');
+      if(e.code==='ArrowRight') keys.add('R');
+      if(e.code==='KeyM'){malle=!malle; toast(malle? '🍺 Malle-Modus an':'Malle-Modus aus');}
+      if(e.code==='Space') togglePause();
+    });
+    window.addEventListener('keyup',e=>{
+      if(e.code==='ArrowLeft') keys.delete('L');
+      if(e.code==='ArrowRight') keys.delete('R');
+    });
+
+    // Mobile controls
+    function mobileHold(btn, set){ let id;
+      const down = ()=>{set(true); id = setInterval(()=>set(true), 16)};
+      const up = ()=>{clearInterval(id); set(false)};
+      btn.addEventListener('pointerdown', down);
+      btn.addEventListener('pointerup', up);
+      btn.addEventListener('pointerleave', up);
+      btn.addEventListener('pointercancel', up);
+    }
+    mobileHold(document.getElementById('leftBtn'), v=> v? keys.add('L'):keys.delete('L'))
+    mobileHold(document.getElementById('rightBtn'), v=> v? keys.add('R'):keys.delete('R'))
+
+    function togglePause(){ if(!running) return; paused = !paused; toast(paused? '⏸️ Pause':'▶️ Weiter'); }
+
+    // Loop
+    function loop(ts){
+      if(!running) return;
+      if(!last) last = ts;
+      const dt = Math.min(32, ts - last); last = ts;
+      if(!paused){
+        update(dt);
+        draw();
+      }
+      requestAnimationFrame(loop);
+    }
+
+    function update(dt){
+      // Level by time
+      acc += dt; if(acc>6000){ acc=0; level++; spawnObstacle(); toast('⤴️ Level '+level) }
+
+      // Move player
+      const s = player.speed + level*0.1;
+      if(keys.has('L')) player.x -= s;
+      if(keys.has('R')) player.x += s;
+      player.x = Math.max(24, Math.min(W-24, player.x));
+
+      // Move obstacles
+      for(const o of obstacles){
+        o.y += o.vy; o.x += Math.sin((o.y+o.w)*0.01)*0.3; // leichte Schlängelbewegung
+      }
+      // Recycle
+      for(let i=obstacles.length-1;i>=0;i--){
+        const o = obstacles[i];
+        if(o.y - o.h/2 > H){ obstacles.splice(i,1); spawnObstacle(); }
+      }
+
+      // Items
+      for(const it of items){ it.y += it.vy; }
+      for(let i=items.length-1;i>=0;i--){
+        const it = items[i];
+        if(rectsOverlap(player, it)){
+          if(it.type==='coin'){ score += 10; toast('+10 🟡'); }
+          if(it.type==='shield'){ shieldMs = 10000; toast('🛡️ Schild aktiv (10s)'); }
+          items.splice(i,1);
+          if(Math.random()<0.7) spawnCoin(); else spawnShield();
+        } else if(it.y - it.h/2 > H){ items.splice(i,1); if(Math.random()<0.8) spawnCoin(); else spawnShield(); }
+      }
+
+      // Collisions
+      if(shieldMs>0){ shieldMs -= dt; }
+      for(let i=obstacles.length-1;i>=0;i--){
+        const o = obstacles[i];
+        if(rectsOverlap(player,o)){
+          if(shieldMs>0){
+            // smash through
+            score += 5; obstacles.splice(i,1); spawnObstacle(); toast('💥 Boom!');
+          } else {
+            gameOver(); return;
+          }
+        }
+      }
+
+      // Score trickle
+      score += dt*0.01*(1+level*0.2);
+      updateHUD();
+    }
+
+    function draw(){
+      // bg
+      ctx.clearRect(0,0,W,H);
+      // subtle road lanes
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 2; ctx.setLineDash([14,14]);
+      for(let i=1;i<=2;i++){ ctx.beginPath(); ctx.moveTo((W/3)*i,0); ctx.lineTo((W/3)*i,H); ctx.stroke(); }
+      ctx.restore();
+
+      // player
+      drawEmoji(EMOJI.player, player.x, player.y, 36);
+      if(shieldMs>0){ drawRing(player.x, player.y, 30, 'rgba(96,165,250,0.6)'); }
+
+      // obstacles
+      for(const o of obstacles){ drawEmoji(malle? EMOJI.beer:EMOJI.wall, o.x, o.y, o.w*0.8); }
+
+      // items
+      for(const it of items){ drawEmoji(it.type==='coin'? EMOJI.coin:EMOJI.shield, it.x, it.y, 28); }
+    }
+
+    function drawEmoji(e, x, y, size){
+      ctx.font = `${size}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(e, x, y+2);
+    }
+    function drawRing(x,y,r,color){
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.strokeStyle=color; ctx.lineWidth=4; ctx.stroke();
+    }
+
+    function toast(msg){
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.hidden = false; clearTimeout(el._t);
+      el._t = setTimeout(()=> el.hidden = true, 1200);
+    }
+
+    function gameOver(){
+      running=false; paused=false;
+      best = Math.max(best, Math.floor(score));
+      localStorage.setItem('emojiDodgeBest', best);
+      sBest.textContent = best;
+      updateHUD();
+      toast('💀 Game Over – Score '+Math.floor(score));
+      // overlay
+      ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = '#fff'; ctx.font = '28px system-ui'; ctx.textAlign='center'; ctx.fillText('Game Over', W/2, H/2-20);
+      ctx.font = '18px system-ui'; ctx.fillText('▶️ Start drücken für neue Runde', W/2, H/2+16);
+    }
+
+    // Buttons
+    document.getElementById('startBtn').onclick = ()=>{ reset(); running=true; requestAnimationFrame(loop); }
+    document.getElementById('pauseBtn').onclick = ()=> togglePause();
+    document.getElementById('resetBtn').onclick = ()=>{ reset(); draw(); }
+    document.getElementById('malleBtn').onclick = ()=>{ malle=!malle; toast(malle? '🍺 Malle-Modus an':'Malle-Modus aus') }
+
+    // Boot
+    reset(); draw();
+  </script>
+</body>
+</html>
